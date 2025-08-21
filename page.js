@@ -201,6 +201,30 @@ function getMimeType(filename) {
   return mimeTypes[ext] || 'image/jpeg';
 }
 
+// 检测是否为移动设备
+function isMobileDevice(userAgent) {
+  if (!userAgent) return false;
+  
+  var mobileKeywords = [
+    'Mobile', 'Android', 'iPhone', 'iPad', 'iPod', 'BlackBerry', 
+    'Windows Phone', 'Opera Mini', 'IEMobile', 'Mobile Safari',
+    'webOS', 'Kindle', 'Silk', 'Fennec', 'Maemo', 'Tablet'
+  ];
+  
+  var lowerUserAgent = userAgent.toLowerCase();
+  
+  // 检查移动设备关键词
+  for (var i = 0; i < mobileKeywords.length; i++) {
+    if (lowerUserAgent.includes(mobileKeywords[i].toLowerCase())) {
+      return true;
+    }
+  }
+  
+  // 检查移动设备正则表达式
+  var mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+  return mobileRegex.test(userAgent);
+}
+
 async function handleRequest(request) {
   try {
     var url = new URL(request.url);
@@ -212,12 +236,25 @@ async function handleRequest(request) {
       prefix = 'ri/h/';
     } else if (imgType === 'v') {
       prefix = 'ri/v/';
+    } else if (imgType === 'ua') {
+      // 根据User-Agent检测设备类型
+      var userAgent = request.headers.get('User-Agent') || '';
+      var isMobile = isMobileDevice(userAgent);
+      
+      // 移动设备显示竖屏图片，桌面设备显示横屏图片
+      prefix = isMobile ? 'ri/v/' : 'ri/h/';
+      
+      // 添加调试信息
+      console.log('User-Agent:', userAgent);
+      console.log('检测为移动设备:', isMobile);
+      console.log('选择前缀:', prefix);
     } else {
       // 显示使用说明
       var helpText = '🖼️ 随机图片展示器\n\n';
       helpText += '使用方法:\n';
       helpText += '• ?img=h - 获取横屏随机图片\n';
-      helpText += '• ?img=v - 获取竖屏随机图片\n\n';
+      helpText += '• ?img=v - 获取竖屏随机图片\n';
+      helpText += '• ?img=ua - 根据设备类型自动选择图片\n\n';
       
       return new Response(helpText, {
         status: 200,
@@ -243,7 +280,15 @@ async function handleRequest(request) {
     var objectKeys = extractObjectKeys(xmlText);
 
     if (objectKeys.length === 0) {
-      var emptyMessage = imgType === 'h' ? '📭 未找到横屏图片' : '📭 未找到竖屏图片';
+      var emptyMessage;
+      if (imgType === 'h') {
+        emptyMessage = '📭 未找到横屏图片';
+      } else if (imgType === 'v') {
+        emptyMessage = '📭 未找到竖屏图片';
+      } else {
+        // ua模式下根据前缀判断
+        emptyMessage = prefix === 'ri/h/' ? '📭 未找到横屏图片' : '📭 未找到竖屏图片';
+      }
       return new Response(emptyMessage, { 
         status: 404,
         headers: { 'Content-Type': 'text/plain; charset=utf-8' }
