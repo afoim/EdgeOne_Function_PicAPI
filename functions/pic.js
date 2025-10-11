@@ -5,8 +5,8 @@ export function onRequest(context) {
 
 // 配置项
 var CONFIG = {
-  maxHorizontalImageNumber: 833,  // 横屏图片最大编号
-  maxVerticalImageNumber: 2942     // 竖屏图片最大编号
+  maxHorizontalImageNumber: 882,  // 横屏图片最大编号
+  maxVerticalImageNumber: 3289     // 竖屏图片最大编号
 };
 
 // 根据文件扩展名获取MIME类型
