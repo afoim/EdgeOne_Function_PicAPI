@@ -5,8 +5,8 @@ export function onRequest(context) {
 
 // 配置项
 var CONFIG = {
-  maxHorizontalImageNumber: 882,  // 横屏图片最大编号
-  maxVerticalImageNumber: 3289     // 竖屏图片最大编号
+  maxHorizontalImageNumber: 901,  // 横屏图片最大编号
+  maxVerticalImageNumber: 3306     // 竖屏图片最大编号
 };
 
 // 根据文件扩展名获取MIME类型
@@ -201,6 +201,7 @@ async function handleRequest(request) {
       helpText += '配置信息:\n';
       helpText += '• 横屏图片最大编号: ' + CONFIG.maxHorizontalImageNumber + '\n';
       helpText += '• 竖屏图片最大编号: ' + CONFIG.maxVerticalImageNumber + '\n';
+      helpText += '• 上次爬图：2025/11/9 15:00' + '\n';
       
       return new Response(helpText, {
         status: 200,
